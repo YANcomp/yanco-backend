@@ -19,6 +19,7 @@ type (
 	Config struct {
 		Environment string
 		HTTP        HTTPConfig
+		POSTGRES    PostgresConfig
 	}
 
 	HTTPConfig struct {
@@ -27,6 +28,13 @@ type (
 		ReadTimeout        time.Duration `mapstructure:"readTimeout"`
 		WriteTimeout       time.Duration `mapstructure:"writeTimeout"`
 		MaxHeaderMegabytes int           `mapstructure:"maxHeaderBytes"`
+	}
+	PostgresConfig struct {
+		Db            string `mapstructure:"db"`
+		User          string `mapstructure:"user"`
+		Password      string `mapstructure:"password"`
+		MigrationsDir string `mapstructure:"migration_dir"`
+		Dsn           string `mapstructure:"dsn"`
 	}
 )
 
@@ -51,6 +59,9 @@ func Init(configsDir string) (*Config, error) {
 
 func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
+		return err
+	}
+	if err := viper.UnmarshalKey("postgres", &cfg.POSTGRES); err != nil {
 		return err
 	}
 

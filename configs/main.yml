@@ -3,3 +3,10 @@ http:
   maxHeaderBytes: 1
   readTimeout: 10s
   writeTimeout: 10s
+
+postgres:
+  db: yancodb
+  user: yancouser
+  password: yancopassword
+  migrations_dir: ./migrations
+  dsn: "host=localhost port=54321 dbname=yancodb user=yancouser password=yancopassword sslmode=disable"

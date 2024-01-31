@@ -3,10 +3,14 @@ package app
 import (
 	"context"
 	"errors"
+	"github.com/YANcomp/platform_common/pkg/db/pg"
 	"github.com/YANcomp/yanco-backend/internal/config"
 	delivery "github.com/YANcomp/yanco-backend/internal/delivery/http"
+	"github.com/YANcomp/yanco-backend/internal/repository"
 	"github.com/YANcomp/yanco-backend/internal/server"
+	"github.com/YANcomp/yanco-backend/internal/service"
 	"github.com/YANcomp/yanco-backend/pkg/logger"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,7 +24,7 @@ import (
 
 // @host localhost:8000
 // @BasePath /api/v1/
-func Run(configPath string) {
+func Run(ctx context.Context, configPath string) {
 	//init configs
 	cfg, err := config.Init(configPath)
 	if err != nil {
@@ -28,7 +32,17 @@ func Run(configPath string) {
 		return
 	}
 
-	handlers := delivery.NewHandler()
+	pgClient, err := pg.New(ctx, cfg.POSTGRES.Dsn)
+	if err != nil {
+		log.Fatalf("failed to create db client: %v", err)
+	}
+
+	// Services, Repos & API Handlers
+	repos := repository.NewRepositories(pgClient)
+	services := service.NewServices(service.Deps{
+		Repos: repos,
+	})
+	handlers := delivery.NewHandler(services)
 
 	// HTTP Server
 	srv := server.NewServer(cfg, handlers.Init(cfg))
