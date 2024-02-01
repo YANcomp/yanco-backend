@@ -27,7 +27,7 @@ const (
 )
 
 func getSupportedColumn() []string {
-	return []string{"header", "description", "targettype", "target", "image", "imagemobile", "iscatalog"}
+	return []string{headerColumn, descriptionColumn, targetTypeColumn, targetColumn, imageColumn, imageMobileColumn, isCatalogColumn}
 }
 
 type BannersRepo struct {
