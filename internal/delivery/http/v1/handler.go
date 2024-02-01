@@ -17,6 +17,7 @@ func NewHandler(services *service.Services) *Handler {
 
 func (h *Handler) Init(api chi.Router) {
 	api.Route("/api/v1", func(r chi.Router) {
+		r.Use(getPagination)
 		h.initBannersRoutes(r)
 	})
 }

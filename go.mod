@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/YANcomp/platform_common v0.0.0-20240131001032-73c9d6c72069 // indirect
+	github.com/YANcomp/platform_common v0.0.0-20240201014555-74291c967c58 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/georgysavva/scany v1.2.1 // indirect
 	github.com/georgysavva/scany/v2 v2.1.0 // indirect

@@ -2,9 +2,10 @@ package v1
 
 import (
 	"encoding/json"
+	"github.com/YANcomp/yanco-backend/internal/domain"
 	"github.com/go-chi/chi/v5"
-	"log"
 	"net/http"
+	"strings"
 )
 
 func (h *Handler) initBannersRoutes(api chi.Router) {
@@ -15,10 +16,28 @@ func (h *Handler) initBannersRoutes(api chi.Router) {
 }
 
 func (h *Handler) GetBanners(w http.ResponseWriter, r *http.Request) {
-	selectParam := chi.URLParam(r, "select")
-	log.Printf(selectParam)
+	getsQuery := domain.GetsQuery{}
 
-	banners, err := h.services.Banners.GetAll(r.Context())
+	//search select params
+	selectParam := chi.URLParam(r, "select")
+	if selectParam != "" {
+		getsQuery.SelectQuery.Selects = strings.Split(selectParam, ",")
+	}
+
+	// search pagination in context
+	pgLimitFromCtx, ok := r.Context().Value(pgLimitCtx).(string)
+	if ok {
+		getsQuery.PaginationQuery.Limit = pgLimitFromCtx
+	}
+	pgOffsetFromCtx, ok := r.Context().Value(pgOffsetCtx).(string)
+	if ok {
+		getsQuery.PaginationQuery.Offset = pgOffsetFromCtx
+	}
+
+	//search filters in query
+	getsQuery.FiltersQuery.Filters = r.URL.Query()
+
+	banners, err := h.services.Banners.GetAll(r.Context(), getsQuery)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(err.Error())

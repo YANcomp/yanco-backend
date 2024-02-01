@@ -1,15 +1,43 @@
 package v1
 
-func getSchoolFromContext(c *gin.Context) (domain.School, error) {
-	value, ex := c.Get(schoolCtx)
-	if !ex {
-		return domain.School{}, errors.New("school is missing from ctx")
-	}
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"regexp"
+	"strings"
+)
 
-	school, ok := value.(domain.School)
-	if !ok {
-		return domain.School{}, errors.New("failed to convert value from ctx to domain.School")
-	}
+const (
+	pgLimitCtx  = "pgLimit"
+	pgOffsetCtx = "pgOffset"
+)
 
-	return school, nil
+func getPagination(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		urlRaw := r.URL.RawQuery
+		ctx := r.Context()
+
+		regex := regexp.MustCompile(`\[([^{}]*)]$`)
+		regexUrlString := regex.FindStringSubmatch(urlRaw)
+		if regexUrlString != nil {
+			splitPagination := strings.Split(regexUrlString[1], ":")
+			for index, element := range splitPagination {
+				if element != "" {
+					switch index {
+					case 0:
+						ctx = context.WithValue(ctx, pgOffsetCtx, element)
+					case 1:
+						ctx = context.WithValue(ctx, pgLimitCtx, element)
+					default:
+						fmt.Println("Error getPagination foreach splitPagination")
+					}
+				}
+			}
+			//почистим следы пагинации в query запросе
+			r.URL.RawQuery = regex.ReplaceAllString(r.URL.RawQuery, "")
+		}
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }

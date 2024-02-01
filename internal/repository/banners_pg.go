@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	tableName = "public.banners"
+	tableName = "banners"
 
 	idColumn          = "id"
 	headerColumn      = "header"
@@ -48,7 +48,6 @@ func (r *BannersRepo) GetAll(ctx context.Context, selectQuery *pgquery.SelectQue
 				return nil, errors.New("Unsupported select field: " + value)
 			}
 		}
-
 		columns = strings.Join(selectQuery.GetFields(), ", ")
 	} else {
 		columns = strings.Join([]string{
@@ -65,7 +64,9 @@ func (r *BannersRepo) GetAll(ctx context.Context, selectQuery *pgquery.SelectQue
 	builder := sq.Select(idColumn).
 		PlaceholderFormat(sq.Dollar).
 		Columns(columns).
-		From(tableName)
+		From(tableName).
+		Limit(uint64(pg.GetLimit())).
+		Offset(uint64(pg.GetOffset()))
 
 	// set filters
 	if !filterQuery.IsEmpty() {

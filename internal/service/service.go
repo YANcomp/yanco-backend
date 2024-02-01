@@ -7,7 +7,7 @@ import (
 )
 
 type Banners interface {
-	GetAll(ctx context.Context) ([]domain.Banner, error)
+	GetAll(ctx context.Context, getsQuery domain.GetsQuery) ([]domain.Banner, error)
 }
 
 type Services struct {
